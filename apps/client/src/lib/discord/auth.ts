@@ -51,8 +51,7 @@ export async function authenticate() {
     ],
   });
 
-  // TODO: actually implement this backend via a cloudflare worker
-  const response = await fetch('/api/token', {
+  const response = await fetch('/api/discordToken', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
