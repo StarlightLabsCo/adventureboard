@@ -12,7 +12,7 @@ compatibility_date = "2024-06-29"
   [env.production.vars]
   VITE_DISCORD_CLIENT_ID = "1241465559753949336"
 
-[d1_database]
+[[d1_databases]]
 binding = "DB"
 database_name = "adventureboard"
 database_id = "c55f2e53-5a57-4ead-81ed-c54ad6a31ee5"
