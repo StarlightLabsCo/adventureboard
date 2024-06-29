@@ -6,7 +6,7 @@ interface GameStore {
   setGameState: (gameState: GameState) => void;
 }
 
-export const useGameStore = create<GameStore>((set, get) => ({
+export const useGameStore = create<GameStore>((set) => ({
   gameState: {
     system: null,
     // currentPageId: 'page:page',
