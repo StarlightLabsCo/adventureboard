@@ -14,6 +14,7 @@ export async function connect(set: WebSocketStoreSet, get: () => WebSocketStore,
       return;
     }
 
+    // TODO: add authToken to url query param
     const wsUrl = `wss://${location.host}${location.pathname}${location.search}`;
     const ws = new WebSocket(wsUrl);
 

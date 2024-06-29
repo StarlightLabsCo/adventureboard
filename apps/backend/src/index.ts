@@ -2,6 +2,7 @@ import { DurableObject } from 'cloudflare:workers';
 import { Connections, Presence, GameState } from 'adventureboard-ws-types';
 import { fetchDiscordUser, stripPrivateInfo } from '@/discord';
 import { APIUser } from 'discord-api-types/v10';
+import { throttle } from 'lodash';
 
 export interface Env {
 	GAME_INSTANCES: DurableObjectNamespace<GameInstance>;
@@ -95,19 +96,34 @@ export class GameInstance extends DurableObject {
 			return new Response('Expected websocket', { status: 426 });
 		}
 
-		// TODO: implement more robust auth to allow for discord and browser user later
-		// const discordUser = JSON.parse(request.headers.get('X-Discord-User') || '{}') as APIUser;
-		// if (!discordUser.id) {
-		// 	return new Response('Unauthorized', { status: 401 });
-		// }
+		const isDiscord = request.headers.get('X-Discord-User') !== null;
+		if (isDiscord) {
+			const discordUser = JSON.parse(request.headers.get('X-Discord-User') || '{}') as APIUser;
+			if (!discordUser.id) {
+				return new Response('Unauthorized', { status: 401 });
+			}
 
-		if (!this.host) {
-			this.host = discordUser.id;
-			await this.ctx.storage.put('host', this.host);
+			if (!this.host) {
+				this.host = discordUser.id;
+				await this.ctx.storage.put('host', this.host);
 
-			await this.loadCampaign();
-			await this.loadSnapshot();
-			await this.loadGameState();
+				await this.loadCampaign();
+				await this.loadSnapshot();
+				await this.loadGameState();
+			}
+		} else {
+			const user = {
+				id: 'harris',
+			};
+
+			if (!this.host) {
+				this.host = user.id;
+				await this.ctx.storage.put('host', this.host);
+
+				await this.loadCampaign();
+				await this.loadSnapshot();
+				await this.loadGameState();
+			}
 		}
 
 		// Init WebSocket
@@ -217,20 +233,20 @@ export class GameInstance extends DurableObject {
 		await this.env.ADVENTUREBOARD_KV.put(snapshotKey, JSON.stringify({ store: this.records, schema: this.schema.serialize() }));
 	}, 1000);
 
-	updateRecords(connectionId: string, updates: HistoryEntry<TLRecord>[], ws: WebSocket) {
-		// try {
-		// 	updates.forEach((update) => {
-		// 		const { added, updated, removed } = update.changes;
-		// 		Object.values(added).forEach((record) => (this.records[record.id] = record));
-		// 		Object.values(updated).forEach(([, to]) => (this.records[to.id] = to));
-		// 		Object.values(removed).forEach((record) => delete this.records[record.id]);
-		// 	});
-		// 	this.broadcast(JSON.stringify({ type: 'update', updates }), [connectionId]);
-		// 	this.saveSnapshot();
-		// } catch (e) {
-		// 	this.sendRecovery(ws);
-		// }
-	}
+	// updateRecords(connectionId: string, updates: HistoryEntry<TLRecord>[], ws: WebSocket) {
+	// 	try {
+	// 		updates.forEach((update) => {
+	// 			const { added, updated, removed } = update.changes;
+	// 			Object.values(added).forEach((record) => (this.records[record.id] = record));
+	// 			Object.values(updated).forEach(([, to]) => (this.records[to.id] = to));
+	// 			Object.values(removed).forEach((record) => delete this.records[record.id]);
+	// 		});
+	// 		this.broadcast(JSON.stringify({ type: 'update', updates }), [connectionId]);
+	// 		this.saveSnapshot();
+	// 	} catch (e) {
+	// 		this.sendRecovery(ws);
+	// 	}
+	// }
 
 	/* Game State */
 	async updateGameState(connectionId: string, gameState: GameState) {
@@ -242,28 +258,35 @@ export class GameInstance extends DurableObject {
 
 	/* Recovery */
 	sendRecovery(ws: WebSocket) {
-		ws.send(
-			JSON.stringify({
-				type: 'recovery',
-				snapshot: { store: this.records, schema: this.schema.serialize() },
-			}),
-		);
+		// ws.send(
+		// 	JSON.stringify({
+		// 		type: 'recovery',
+		// 		snapshot: { store: this.records, schema: this.schema.serialize() },
+		// 	}),
+		// );
 	}
 }
 
 export default {
 	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
-		const pathParts = url.pathname.split('/');
+		const params = new URLSearchParams(url.search);
 
-		if (pathParts[1] === 'game' && pathParts[2]) {
-			const id = env.GAME_INSTANCES.idFromName(pathParts[2]);
+		const instanceId = params.get('instanceId');
+		if (!instanceId) {
+			return new Response('Instance ID is required', { status: 400 });
+		}
+
+		if (instanceId) {
+			const id = env.GAME_INSTANCES.idFromName(instanceId);
 			const stub = env.GAME_INSTANCES.get(id);
 
-			const accessToken = url.searchParams.get('access_token');
+			const accessToken = params.get('accessToken');
 			if (!accessToken) {
 				return new Response('Unauthorized', { status: 401 });
 			}
+
+			// TODO: need a way to tell discord user apart from regular user
 
 			const discordUser = await fetchDiscordUser(accessToken, env.DISCORD_API_BASE);
 			if (!discordUser) {
