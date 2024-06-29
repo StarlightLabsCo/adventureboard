@@ -18,7 +18,7 @@ new_classes = ["GameInstance"]
 binding = "ADVENTUREBOARD_KV"
 id = "b017e45fc5f644c19f0e8f554945e998"
 
-[d1_database]
+[[d1_databases]]
 binding = "DB"
 database_name = "adventureboard"
 database_id = "c55f2e53-5a57-4ead-81ed-c54ad6a31ee5"
