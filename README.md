@@ -1,81 +1,74 @@
-# Turborepo starter
+# Adventureboard
 
-This is an official starter Turborepo.
+Adventureboard is a multiplayer collaborative canvas built specifically for Dungeons & Dragons campaigns. It provides a real-time, interactive environment for Dungeon Masters and players to visualize and manage their adventures.
 
-## Using this example
+## Project Structure
 
-Run the following command:
+Adventureboard is composed of two main components:
 
-```sh
-npx create-turbo@latest
-```
+1. **Client Application**: A React/Vite/TypeScript project located in the `@client` directory.
+2. **Server Application**: Cloudflare Durable Objects code to manage multiplayer aspects in the `@backend` directory.
 
-## What's inside?
+## Features
 
-This Turborepo includes the following packages/apps:
+- Real-time collaborative canvas
+- D&D-specific tools and assets
+- Multiplayer support for seamless group interaction
+- Responsive design for various devices
 
-### Apps and Packages
+## Getting Started
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+### Prerequisites
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+- Bun (1.1.17)
 
-### Utilities
+### Installation
 
-This Turborepo has some additional tools already setup for you:
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/adventureboard.git
+   cd adventureboard
+   ```
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+2. Install dependencies:
+   ```
+   bun install
+   ```
 
-### Build
+3. Start the development server:
+   ```
+   bun run dev
+   ```
 
-To build all apps and packages, run the following command:
+## Development
 
-```
-cd my-turborepo
-pnpm build
-```
+### Client Application
 
-### Develop
+The client application is built with React, Vite, and TypeScript. It's located in the `@client` directory.
 
-To develop all apps and packages, run the following command:
-
-```
-cd my-turborepo
-pnpm dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
+To start the client development server:
 
 ```
-cd my-turborepo
-npx turbo login
+cd apps/client
+bun run dev
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+### Server Application
 
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+The server application uses Cloudflare Durable Objects. Deployment and development instructions for the server component can be found in the server directory.
+
+## Building for Production
+
+To build the client application for production:
 
 ```
-npx turbo link
+cd apps/client
+bun run build
 ```
 
-## Useful Links
+## More Info
 
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+- [React](https://reactjs.org/)
+- [Vite](https://vitejs.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Cloudflare Workers](https://workers.cloudflare.com/)

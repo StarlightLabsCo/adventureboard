@@ -1,0 +1,21 @@
+{
+	"name": "game-instance-manager",
+	"version": "0.0.0",
+	"private": true,
+	"scripts": {
+		"deploy": "wrangler deploy",
+		"dev": "wrangler dev",
+		"start": "wrangler dev",
+		"cf-typegen": "wrangler types"
+	},
+	"devDependencies": {
+		"adventureboard-ws-types": "workspace:*",
+		"@cloudflare/workers-types": "^4.20240512.0",
+		"typescript": "^5.0.4",
+		"wrangler": "^3.57.1"
+	},
+	"dependencies": {
+		"discord-api-types": "^0.37.86",
+		"lodash": "^4.17.21"
+	}
+}
