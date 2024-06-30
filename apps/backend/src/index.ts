@@ -1,12 +1,14 @@
 import { DurableObject } from 'cloudflare:workers';
 import { Connections, Presence, GameState } from 'adventureboard-ws-types';
-import { fetchDiscordUser, stripPrivateInfo } from '@/discord';
 import { APIUser } from 'discord-api-types/v10';
 import { throttle } from 'lodash';
+import { createId } from '@paralleldrive/cuid2';
+import { fetchDiscordUser, stripPrivateInfo } from '@/discord';
 
 export interface Env {
+	DB: D1Database;
+	KV: KVNamespace; // KV keys: hostId-campaigns, hostId-selectedCampaignId, hostId-campaignId-snapshot, hostId-campaignId-gameState
 	GAME_INSTANCES: DurableObjectNamespace<GameInstance>;
-	ADVENTUREBOARD_KV: KVNamespace; // KV keys: hostId-campaigns, hostId-selectedCampaignId, hostId-campaignId-snapshot, hostId-campaignId-gameState
 	DISCORD_API_BASE: string;
 }
 
@@ -61,13 +63,13 @@ export class GameInstance extends DurableObject {
 	async loadCampaign() {
 		if (!this.host) return;
 
-		const selectedCampaignId = await this.env.ADVENTUREBOARD_KV.get<string | null>(`${this.host}-selectedCampaignId`);
+		const selectedCampaignId = await this.env.KV.get<string | null>(`${this.host}-selectedCampaignId`);
 		if (selectedCampaignId) {
 			this.campaignId = selectedCampaignId;
 		} else {
 			this.campaignId = crypto.randomUUID();
-			await this.env.ADVENTUREBOARD_KV.put(`${this.host}-campaigns`, JSON.stringify([this.campaignId]));
-			await this.env.ADVENTUREBOARD_KV.put(`${this.host}-selectedCampaignId`, this.campaignId);
+			await this.env.KV.put(`${this.host}-campaigns`, JSON.stringify([this.campaignId]));
+			await this.env.KV.put(`${this.host}-selectedCampaignId`, this.campaignId);
 		}
 	}
 
@@ -81,9 +83,9 @@ export class GameInstance extends DurableObject {
 		if (!this.host || !this.campaignId) return;
 
 		const gameStateKey = `${this.host}-${this.campaignId}-gameState`;
-		const gameStateJSON = await this.env.ADVENTUREBOARD_KV.get<string>(gameStateKey);
+		const gameStateJSON = await this.env.KV.get<string>(gameStateKey);
 		if (!gameStateJSON) {
-			this.env.ADVENTUREBOARD_KV.put(gameStateKey, JSON.stringify(this.gameState));
+			this.env.KV.put(gameStateKey, JSON.stringify(this.gameState));
 		} else {
 			this.gameState = JSON.parse(gameStateJSON);
 		}
@@ -113,7 +115,7 @@ export class GameInstance extends DurableObject {
 			}
 		} else {
 			const user = {
-				id: 'harris',
+				id: createId(),
 			};
 
 			if (!this.host) {
@@ -230,7 +232,7 @@ export class GameInstance extends DurableObject {
 		if (!this.host || !this.campaignId) return;
 
 		const snapshotKey = `${this.host}-${this.campaignId}-snapshot`;
-		await this.env.ADVENTUREBOARD_KV.put(snapshotKey, JSON.stringify({ store: this.records, schema: this.schema.serialize() }));
+		await this.env.KV.put(snapshotKey, JSON.stringify({ store: this.records, schema: this.schema.serialize() }));
 	}, 1000);
 
 	// updateRecords(connectionId: string, updates: HistoryEntry<TLRecord>[], ws: WebSocket) {
@@ -253,7 +255,7 @@ export class GameInstance extends DurableObject {
 		this.gameState = gameState;
 		this.broadcast(JSON.stringify({ type: 'gameState', gameState }), [connectionId]);
 		const gameStateKey = `${this.host}-${this.campaignId}-gameState`;
-		await this.env.ADVENTUREBOARD_KV.put(gameStateKey, JSON.stringify(gameState));
+		await this.env.KV.put(gameStateKey, JSON.stringify(gameState));
 	}
 
 	/* Recovery */

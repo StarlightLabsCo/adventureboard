@@ -6,6 +6,7 @@ interface Env {
   DISCORD_CLIENT_SECRET: string;
 }
 
+// This is being called as part of the Embedded Activity Auth Flow (not traditional browser oauth)
 export const onRequest: PagesFunction<Env> = async (context) => {
   const { request } = context;
   const { code } = (await request.json()) as { code: string };

@@ -4,10 +4,19 @@ interface GlobalStore {
   isDiscord: boolean;
 }
 
-const determineIsDiscord = (): boolean => {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.has('frame_id');
-};
+function determineIsDiscord(): boolean {
+  const isDiscordHostName = location.hostname.endsWith('discordsays.com');
+  const hasFrameId = location.search.includes('frame_id');
+
+  const isDiscord = isDiscordHostName && hasFrameId;
+  if (isDiscord) {
+    console.log('[AdventureBoard] Running in Discord Embedded Activity.');
+  } else {
+    console.log('[AdventureBoard] Running in standalone browser.');
+  }
+
+  return isDiscord;
+}
 
 export const useGlobalStore = create<GlobalStore>(() => ({
   isDiscord: determineIsDiscord(),

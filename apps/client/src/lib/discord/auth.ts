@@ -51,7 +51,7 @@ export async function authenticate() {
     ],
   });
 
-  const response = await fetch('/api/discordToken', {
+  const response = await fetch('/auth/token/discord', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

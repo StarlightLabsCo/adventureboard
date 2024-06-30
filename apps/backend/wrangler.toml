@@ -15,7 +15,7 @@ tag = "v1"
 new_classes = ["GameInstance"]
 
 [[kv_namespaces]]
-binding = "ADVENTUREBOARD_KV"
+binding = "KV"
 id = "b017e45fc5f644c19f0e8f554945e998"
 
 [[d1_databases]]

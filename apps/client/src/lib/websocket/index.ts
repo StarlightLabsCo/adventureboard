@@ -4,7 +4,7 @@ import { connect } from './connection';
 
 export type WebSocketStore = {
   ws: WebSocket | null;
-  connect: (accessToken: string, instanceId: string) => void;
+  connect: (instanceId: string) => void;
   exponentialBackoff: number;
 
   connectionId: string | null;
@@ -22,7 +22,7 @@ export type WebSocketStoreSet = (partial: Partial<WebSocketStore>) => void;
 
 export const useWebsocketStore = create<WebSocketStore>((set, get) => ({
   ws: null,
-  connect: (accessToken: string, instanceId: string) => connect(set, get, accessToken, instanceId),
+  connect: (instanceId: string) => connect(set, get, instanceId),
   exponentialBackoff: 250,
 
   connectionId: null,

@@ -1,20 +1,18 @@
 import { WebSocketStore, WebSocketStoreSet } from '.';
 
-export async function connect(set: WebSocketStoreSet, get: () => WebSocketStore, accessToken: string, instanceId: string) {
+export async function connect(set: WebSocketStoreSet, get: () => WebSocketStore, instanceId: string) {
   try {
     console.log(`[AdventureBoard WS] Connecting...`);
 
-    if (!accessToken) {
-      console.error('[AdventureBoard WS] No accessToken provided');
-      return;
-    }
+    // TODO: we're abstracting away the need to put auth token and stuff in
+    // TODO: check auth - check if we have discord auth, or check i
 
     if (!instanceId) {
       console.error('[AdventureBoard WS] No instanceId provided');
       return;
     }
 
-    // TODO: add authToken to url query param
+    // TODO: change this to be a patterned url
     const wsUrl = `wss://${location.host}${location.pathname}${location.search}`;
     const ws = new WebSocket(wsUrl);
 
@@ -48,17 +46,17 @@ export async function connect(set: WebSocketStoreSet, get: () => WebSocketStore,
         // TODO: log error to sentry
       }
 
-      retry(set, get, accessToken, instanceId);
+      retry(set, get, instanceId);
     });
   } catch (error) {
     console.error('[AdventureBoard WS] Error:', error);
-    retry(set, get, accessToken, instanceId);
+    retry(set, get, instanceId);
   }
 }
 
-export async function retry(set: WebSocketStoreSet, get: () => WebSocketStore, accessToken: string, instanceId: string) {
+export async function retry(set: WebSocketStoreSet, get: () => WebSocketStore, instanceId: string) {
   setTimeout(() => {
     set({ exponentialBackoff: get().exponentialBackoff * 2 });
-    get().connect(accessToken, instanceId);
+    get().connect(instanceId);
   }, get().exponentialBackoff);
 }
