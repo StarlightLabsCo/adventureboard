@@ -1,6 +1,5 @@
 import { generateState } from 'arctic';
 import { createDiscordAuth } from 'adventureboard-auth';
-import { cookies } from 'next/headers';
 
 export async function GET(
   request: Request,
@@ -15,13 +14,14 @@ export async function GET(
   const state = generateState();
   const url = await discord.createAuthorizationURL(state);
 
-  cookies().set('discord_oauth_state', state, {
-    path: '/',
-    secure: env.ENVIRONMENT === 'production',
-    httpOnly: true,
-    maxAge: 60 * 10,
-    sameSite: 'lax',
-  });
+  // TODO: replace with cloudflare functions cookies function
+  // cookies().set('discord_oauth_state', state, {
+  //   path: '/',
+  //   secure: env.ENVIRONMENT === 'production',
+  //   httpOnly: true,
+  //   maxAge: 60 * 10,
+  //   sameSite: 'lax',
+  // });
 
   return Response.redirect(url.toString());
 }
